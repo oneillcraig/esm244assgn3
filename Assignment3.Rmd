@@ -117,8 +117,13 @@ ca_np <- tm_shape(ca_shape)+
               fillColor = "Blue")
 
 ca_np_gg <- ggplot(canp_shape)+
-  geom_sf(data = ca_shape, aes(fill = TRUE, color = 'black' ), color = 'grey')+
-  geom_sf(aes(color = UNIT_TYPE, fill = UNIT_NAME))
+  geom_sf(data = ca_shape, aes(fill = STATE), color = "gray58", fill = "gray33")+
+  geom_sf(aes(color = UNIT_TYPE, fill = UNIT_TYPE), color = "blue", fill = "orange")+
+  theme(axis.text.x = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank(),
+        rect = element_blank(),
+        panel.grid.major = element_line(color = "transparent"))
 
 ca_np_gg
 
