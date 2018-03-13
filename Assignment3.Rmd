@@ -108,7 +108,7 @@ canp_shape <- np_shape %>%
   select(UNIT_NAME, STATE, UNIT_TYPE, geometry)
 
   
-View(canp_shape)  
+View(ca_shape)  
 plot(canp_shape)
 
 ca_np <- tm_shape(ca_shape)+
@@ -117,8 +117,8 @@ ca_np <- tm_shape(ca_shape)+
               fillColor = "Blue")
 
 ca_np_gg <- ggplot(canp_shape)+
-  geom_sf(data = ca_shape)+
-  geom_sf(aes(color = UNIT_NAME))
+  geom_sf(data = ca_shape, aes(fill = TRUE, color = 'black' ), color = 'grey')+
+  geom_sf(aes(color = UNIT_TYPE, fill = UNIT_NAME))
 
 ca_np_gg
 
