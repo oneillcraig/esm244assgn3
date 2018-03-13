@@ -1,0 +1,90 @@
+---
+title: "ESM244 Assignment3"
+author: "Craig O'Neill"
+date: "March 12, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(forecast)
+library(tseries)
+```
+
+
+##Task 3
+
+a)  Create a graph of the decomposed time series data (tuckee_flow).  In text beneath the graph describe the time series data.
+
+```{r}
+truckee <- read.csv("truckee_flow-edit.csv")
+
+truckee_ts <- ts(truckee$mean_va, frequency = 12, start = c(2000, 1))
+
+truckee_dc <- decompose(truckee_ts)
+acf(truckee_ts)
+ggtsdisplay(truckee_ts)
+adf_truckee <- adf.test(truckee_ts)
+adf_truckee
+plot(truckee_dc)
+```
+
+This data appears to be additive (why).
+The data is stationary appears to be stationary, confirmed using a Dickey-Fuller test which calculates the p-value as less than 0.05, rejecting the null-hypothesis that the data is non-stationary.
+
+There is annual seasonality.
+
+b)  Use either Holt-Winters of ARIMA to forecast Truckee River for 5 years after the final observation.  Visualize the forecasted data in a graph.
+
+
+First Holt-Winters
+```{r}
+truckee_hw <- HoltWinters(truckee_ts)
+truckee_hw
+plot(truckee_hw)
+
+truckee_holtfc <- forecast(truckee_hw, h = 60)
+plot(truckee_holtfc)
+
+
+```
+
+
+Next ARIMA
+```{r}
+truckee_pdq <- auto.arima(truckee_ts)
+truckee_pdq
+```
+
+ARIMA (3,1,4)(0,0,1)
+
+```{r}
+truckee_arima <- arima(truckee_ts, order = c(3,1,4), seasonal = list(order = c(0,0,1)))
+
+par(mfrow = c(1,2))
+hist(truckee_arima$residuals)
+qqnorm(truckee_arima$residuals)
+
+forecast_truckee <- forecast(truckee_arima, h = 60)
+plot(forecast_truckee)
+```
+
+Plotting in ggPlot
+
+```{r}
+truckee_df <- data.frame(forecast_truckee)
+
+View(truckee_df)
+
+truckee_df
+
+dates <- seq.Date(as.Date("2000/1/1"), by = "month", length.out = 297)  
+  
+ggplot(data = truckee, aes(x=dates, y=mean_va))+
+  geom_line()
+```
+
