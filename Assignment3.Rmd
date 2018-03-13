@@ -98,20 +98,6 @@ plot(forecast_truckee,
 hist(forecast_truckee$residuals)
 ```
 
-Plotting in ggPlot
-
-```{r}
-truckee_df <- data.frame(forecast_truckee)
-
-View(truckee_df)
-
-truckee_df
-
-dates <- seq.Date(as.Date("2000/1/1"), by = "month", length.out = 297)  
-  
-ggplot(data = truckee, aes(x=dates, y=mean_va))+
-  geom_line()
-```
 
 ##Task 4 Mapping California's National Parks
 
@@ -133,11 +119,6 @@ canp_shape <- np_shape %>%
   
 View(ca_shape)  
 plot(canp_shape)
-
-ca_np <- tm_shape(ca_shape)+
-  tm_polygons(data = canp_shape$UNIT_NAME,
-              title = "California's National Parks",
-              fillColor = "Blue")
 
 ca_np_gg <- ggplot(canp_shape)+
   geom_sf(data = ca_shape, aes(fill = STATE), color = "gray58", fill = "gray33")+
@@ -202,6 +183,8 @@ impute_pooled_liz <- pool(lm_liz)
 
 impute_pooled_liz
 summary(impute_pooled_liz)
+
+combined_liz <- complete(impute_pooled_liz)
 
 
 ```
