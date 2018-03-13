@@ -2,7 +2,9 @@
 title: "ESM244 Assignment3"
 author: "Craig O'Neill"
 date: "March 12, 2018"
-output: html_document
+output:
+  word_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -174,7 +176,7 @@ summary(imputed_liz)
 ```
 COmpete the cases using imputed cvalues
 ```{r}
-complete(imputed_liz, action = 2)
+com_liz <- complete(imputed_liz, action = 2)
 ```
 
 ```{r}
@@ -184,7 +186,7 @@ impute_pooled_liz <- pool(lm_liz)
 impute_pooled_liz
 summary(impute_pooled_liz)
 
-combined_liz <- complete(impute_pooled_liz)
+#combined_liz <- complete(impute_pooled_liz)
 
 
 ```
@@ -200,14 +202,23 @@ liz_cc_m <- liz_cc %>%
 
 t.test(liz_cc_f$weight, liz_cc_m$weight)
 
-```
 
-The mean weight of lizards trapped at the CALI site do not signficantly differ between males and females (p-value = 0.4962, alpha = 0.9)
+liz_cc_f <- com_liz %>% 
+  filter(sex == "F")
+liz_cc_m <- com_liz %>% 
+  filter(sex == "M")
+
+
+t.test(liz_cc_f$weight, liz_cc_m$weight)
+```
+Task 5 A)
+
+The mean weight of lizards trapped at the CALI site do signficantly differ between males and females (Welch Two Sample t-test, p-value = 0.0142, alpha = 0.05).  Missing values in dataset were imputed using multiple imputation (m=5).
 
 B) For lizards trapped at CALI site, is there a significant difference in the proportion of adult male and female lizards with broken tails?
 
 ```{r}
-liz_cc_con <- liz_cc %>%
+liz_cc_con <- com_liz %>%
   select(sex, tail) %>% 
   filter(sex != "J")
 
@@ -220,6 +231,7 @@ chisq <- chisq.test(table2)
 chisq
 ```
 
-A Chi-Squared test was preformed on the 
+Task 5 1) 
 
-There is no significant difference between the ratio of males with broken tails and females with broken tails for the lizards trapped at the CALI site (p-value = 0.6862, x-squared = 0.16319)
+A chi-square analysis revealed  significant difference between proportions of lizards with broken tails based upon sex (X2(1) = 10.353, p = 0.001293) trapped at the CALI site.  Multiple imputation was used (m=5) to address missing at random data.
+
