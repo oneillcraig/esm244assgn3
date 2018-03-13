@@ -13,6 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(forecast)
 library(tseries)
+library(sf)
+library(tmap)
 ```
 
 
@@ -86,5 +88,32 @@ dates <- seq.Date(as.Date("2000/1/1"), by = "month", length.out = 297)
   
 ggplot(data = truckee, aes(x=dates, y=mean_va))+
   geom_line()
+```
+
+##Task 4 Mapping California's National Parks
+
+```{r}
+ca_shape <- st_read(dsn = ".", layer = "california_county_shape_file")
+
+np_shape <- st_read(dsn = ".", layer = "nps_boundary")
+
+canp_shape <- np_shape %>% 
+  filter(STATE == "CA") %>%
+  filter(UNIT_TYPE == "National Park") %>% 
+  select(UNIT_NAME, STATE, UNIT_TYPE, geometry)
+
+  
+View(canp_shape)  
+plot(canp_shape)
+
+ca_np <- tm_shape(ca_shape)+
+  tm_polygons(data = canp_shape$UNIT_NAME,
+              title = "California's National Parks",
+              fillColor = "Blue")
+
+ca_np_gg <- ggplot(ca_shape)+
+  geom_sf(data = canp_shape)
+
+
 ```
 
