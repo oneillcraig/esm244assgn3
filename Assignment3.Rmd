@@ -130,3 +130,54 @@ ca_np_gg
 
 ```
 
+
+###Task 5 LTER Lizards in the Northern Chihuahuan Desert
+
+```{r}
+library(VIM)
+library(mice)
+```
+
+
+1.  For all lizards at site "CALI", do weights of male and female ault lizards differ significantly?
+
+```{r}
+
+lizard <- read.csv("lter_lizard_pitfall_edited.csv")
+
+lizard_cal <- lizard %>% 
+  filter(site == "CALI") %>% 
+  select(date, site, sex, weight, tail)
+
+lizard_cal$site <- as.factor(lizard_cal$site)
+lizard_cal$tail <- as.factor(lizard_cal$tail)
+lizard_cal$sex <- as.factor(lizard_cal$sex)
+
+
+```
+
+
+Identify missing cases
+
+```{r}
+cc <- lizard_cal[complete.cases(lizard_cal),] #this extra comma tells R to just look at the rows of data.
+missings <- lizard_cal[!complete.cases(lizard_cal),]
+
+aggr(lizard_cal, prop = F, numbers = T)
+
+imputed_liz <- mice(lizard_cal, m = 5)
+summary(imputed_liz)
+```
+COmpete the cases using imputed cvalues
+```{r}
+complete(imputed_liz, action = 2)
+```
+
+```{r}
+lm_liz <- with(imputed_liz, lm(weight ~ sex))
+impute_pooled_liz <- pool(lm_liz)
+
+impute_pooled_liz
+summary(impute_pooled_liz)
+```
+
