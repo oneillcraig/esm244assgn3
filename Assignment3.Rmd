@@ -95,7 +95,12 @@ ggplot(data = truckee, aes(x=dates, y=mean_va))+
 ```{r}
 ca_shape <- st_read(dsn = ".", layer = "california_county_shape_file")
 
+st_crs(ca_shape) <- 4326
+
 np_shape <- st_read(dsn = ".", layer = "nps_boundary")
+
+np_shape <- st_transform(np_shape, "+init=epsg:4326")
+
 
 canp_shape <- np_shape %>% 
   filter(STATE == "CA") %>%
@@ -111,8 +116,11 @@ ca_np <- tm_shape(ca_shape)+
               title = "California's National Parks",
               fillColor = "Blue")
 
-ca_np_gg <- ggplot(ca_shape)+
-  geom_sf(data = canp_shape)
+ca_np_gg <- ggplot(canp_shape)+
+  geom_sf(data = ca_shape)+
+  geom_sf(aes(color = UNIT_NAME))
+
+ca_np_gg
 
 
 ```
