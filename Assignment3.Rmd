@@ -20,40 +20,58 @@ library(tmap)
 
 ##Task 3
 
-a)  Create a graph of the decomposed time series data (tuckee_flow).  In text beneath the graph describe the time series data.
+#a)  Create a graph of the decomposed time series data (tuckee_flow).  In text beneath the graph describe the time series data.
 
 ```{r}
 truckee <- read.csv("truckee_flow-edit.csv")
 
 truckee_ts <- ts(truckee$mean_va, frequency = 12, start = c(2000, 1))
 
-truckee_dc <- decompose(truckee_ts)
+truckee_dc <- decompose(truckee_ts, type = "additive")
 acf(truckee_ts)
 ggtsdisplay(truckee_ts)
 adf_truckee <- adf.test(truckee_ts)
 adf_truckee
 plot(truckee_dc)
+
+minustrend <- truckee_dc$x - truckee_dc$seasonal
+plot(minustrend)
+
+
 ```
+Part a Response:
 
-This data appears to be additive (why).
-The data is stationary appears to be stationary, confirmed using a Dickey-Fuller test which calculates the p-value as less than 0.05, rejecting the null-hypothesis that the data is non-stationary.
+The time series data for Truckee discharge is stationary with an annual seasonality.  A Dickey-Fuller test was used to test the data, a p-value of 0.01 was found indicating that the data is not non-stationary.  The data appears to be additive, as confirmed by the even distribution of residuals in the decomposed dataset.  There appears to be a longer term cyclical trend beyond the annual seasonality, this longer term cyclical trend appears to be occuring every 5 years.  There also appears to be an outlier in the data occuring shortly after 2015.
 
-There is annual seasonality.
 
-b)  Use either Holt-Winters of ARIMA to forecast Truckee River for 5 years after the final observation.  Visualize the forecasted data in a graph.
+Part a cut content:
+Decomposing the time series data for the Truckee discharge
+
+The residuals of the additive decomposed time series analysis do not seem to differ significantly throughout the time series indicating that the data is additive.
+The data is stationary appears to be stationary, confirmed using a Dickey-Fuller test which calculates the p-value as less than 0.05, rejecting the null-hypothesis that the data is non-stationary.  Additionally, graphing the observations less the trend in the decomposed dataset reveals that the data set does not appear to have any moving trend.  There is an observed outlier, however, occuring shortly after 2015.
+
+The data appears to have annual seasonality.
+
+
+#b)  Use either Holt-Winters of ARIMA to forecast Truckee River for 5 years after the final observation.  Visualize the forecasted data in a graph.
 
 
 First Holt-Winters
 ```{r}
 truckee_hw <- HoltWinters(truckee_ts)
-truckee_hw
-plot(truckee_hw)
+#hw_fc_60 <- predict(truckee_hw, n.ahead = 60, prediction.interval = T, level = 0.95)
+#plot(truckee_hw, hw_fc_60)
 
 truckee_holtfc <- forecast(truckee_hw, h = 60)
-plot(truckee_holtfc)
+plot(truckee_holtfc,
+     main = "Modeled Truckee Discharge with 5-Year Forecast",
+     xlab = "Year",
+     ylab = "Mean Monthly Discharge (cuft/s)")
 
-
+hist(truckee_holtfc$residuals)
 ```
+
+Part B) Response (Graphs above)
 
 
 Next ARIMA
@@ -72,7 +90,12 @@ hist(truckee_arima$residuals)
 qqnorm(truckee_arima$residuals)
 
 forecast_truckee <- forecast(truckee_arima, h = 60)
-plot(forecast_truckee)
+plot(forecast_truckee,
+     main = "Modeled Truckee Discharge with 5-Year ARIMA Forecast",
+     xlab = "Year",
+     ylab = "Mean Monthly Discharge (cuft/s)")
+
+hist(forecast_truckee$residuals)
 ```
 
 Plotting in ggPlot
@@ -160,8 +183,8 @@ lizard_cal$sex <- as.factor(lizard_cal$sex)
 Identify missing cases
 
 ```{r}
-cc <- lizard_cal[complete.cases(lizard_cal),] #this extra comma tells R to just look at the rows of data.
-missings <- lizard_cal[!complete.cases(lizard_cal),]
+liz_cc <- lizard_cal[complete.cases(lizard_cal),] #this extra comma tells R to just look at the rows of data.
+liz_missings <- lizard_cal[!complete.cases(lizard_cal),]
 
 aggr(lizard_cal, prop = F, numbers = T)
 
@@ -179,5 +202,41 @@ impute_pooled_liz <- pool(lm_liz)
 
 impute_pooled_liz
 summary(impute_pooled_liz)
+
+
 ```
 
+
+A) For All Lizards trapped at site CALI do weights of male and female adult lizards
+```{r}
+liz_cc_f <- liz_cc %>% 
+  filter(sex == "F")
+liz_cc_m <- liz_cc %>% 
+  filter(sex == "M")
+
+
+t.test(liz_cc_f$weight, liz_cc_m$weight)
+
+```
+
+The mean weight of lizards trapped at the CALI site do not signficantly differ between males and females (p-value = 0.4962, alpha = 0.9)
+
+B) For lizards trapped at CALI site, is there a significant difference in the proportion of adult male and female lizards with broken tails?
+
+```{r}
+liz_cc_con <- liz_cc %>%
+  select(sex, tail) %>% 
+  filter(sex != "J")
+
+table1 <- table(liz_cc_con)
+table2 <- table1[-2,]
+
+View(table2)
+
+chisq <- chisq.test(table2)
+chisq
+```
+
+A Chi-Squared test was preformed on the 
+
+There is no significant difference between the ratio of males with broken tails and females with broken tails for the lizards trapped at the CALI site (p-value = 0.6862, x-squared = 0.16319)
